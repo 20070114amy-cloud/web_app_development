@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="fw-bold mb-3" style="letter-spacing: 2px;">
+        <i class="fa-solid fa-rocket me-2" style="color: #20e3b2;"></i>星際任務艙
+    </h1>
+    <p class="text-white-50">以最優雅、最高質感的姿態解鎖今天的待辦清單</p>
+</div>
+
+<!-- 新增任務表單 -->
+<!-- Action 指向我們剛剛設計好的 create_task 路由 -->
+<form action="{{ url_for('task_bp.create_task') }}" method="POST" class="mb-5 d-flex gap-2">
+    <input type="text" name="title" class="form-control form-control-custom flex-grow-1" placeholder="準備征服什麼新目標？" required autocomplete="off">
+    <button type="submit" class="btn btn-primary-custom px-4"><i class="fa-solid fa-plus me-1"></i> 新增</button>
+</form>
+
+<!-- 篩選列 -->
+<div class="d-flex justify-content-center filter-tabs mb-4 gap-2">
+    <a href="{{ url_for('task_bp.index') }}" class="{% if not current_filter %}active{% endif %}">全部</a>
+    <a href="{{ url_for('task_bp.index', filter='active') }}" class="{% if current_filter == 'active' %}active{% endif %}">未完成</a>
+    <a href="{{ url_for('task_bp.index', filter='completed') }}" class="{% if current_filter == 'completed' %}active{% endif %}">已完成</a>
+</div>
+
+<!-- 任務清單呈現 -->
+<div class="task-list">
+    {% if tasks %}
+        {% for task in tasks %}
+            <div class="task-item {% if task.status == 'completed' %}completed{% endif %}">
+                <div class="d-flex align-items-center flex-grow-1">
+                    
+                    <!-- 完成狀態切換按鈕 form -->
+                    <form action="{{ url_for('task_bp.toggle_task', task_id=task.id) }}" method="POST" class="me-3 m-0">
+                        {% if task.status == 'active' %}
+                            <button type="submit" class="btn-action complete" title="標記完成">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn-action undo" title="取消完成">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </button>
+                        {% endif %}
+                    </form>
+                    
+                    <!-- 任務標題 -->
+                    <span class="task-title">{{ task.title }}</span>
+                </div>
+                
+                <!-- 刪除任務按鈕 form -->
+                <form action="{{ url_for('task_bp.delete_task', task_id=task.id) }}" method="POST" class="m-0 ms-2" onsubmit="return confirm('確定要銷毀這個任務嗎？');">
+                    <button type="submit" class="btn-action delete" title="刪除任務">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        {% endfor %}
+    {% else %}
+        <!-- 當沒有符合的任務時 -->
+        <div class="text-center py-5">
+            <i class="fa-solid fa-clipboard-list fa-3x text-white-50 mb-3" style="opacity: 0.5;"></i>
+            <h5 class="text-white-50">這裡太空曠了... 來新增點東西填滿它吧！</h5>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
